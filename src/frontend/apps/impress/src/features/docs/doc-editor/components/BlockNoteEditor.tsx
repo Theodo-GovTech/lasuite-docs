@@ -32,6 +32,7 @@ import {
   CalloutBlock,
   DatabaseBlock,
   DividerBlock,
+  GristChartBlock,
   ReactEmbedBlock,
 } from './custom-blocks';
 
@@ -45,6 +46,7 @@ export const blockNoteSchema = withPageBreak(
       database: DatabaseBlock,
       divider: DividerBlock,
       embed: ReactEmbedBlock,
+      grist_chart: GristChartBlock,
     },
   }),
 );
