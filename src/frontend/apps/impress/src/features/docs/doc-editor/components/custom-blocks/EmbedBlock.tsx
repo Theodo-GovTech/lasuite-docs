@@ -9,6 +9,7 @@ import {
 import {
   BlockTypeSelectItem,
   ReactCustomBlockRenderProps,
+  ResizableFileBlockWrapper,
   createReactBlockSpec,
 } from '@blocknote/react';
 import { TFunction } from 'i18next';
@@ -152,9 +153,9 @@ export const getEmbedReactSlashMenuItems = (
         type: 'embed',
       });
     },
-    aliases: ['embed', 'iframe', 'link'],
+    aliases: ['newEmbed', 'iframeBN', 'linkBN'],
     group,
-    icon: <Icon iconName="link" $size="18px" />,
+    icon: <Icon iconName="language" $size="18px" />,
     subtext: t('Add an embed block'),
   },
 ];
@@ -165,5 +166,5 @@ export const getEmbedFormattingToolbarItems = (
   name: t('Embed'),
   type: 'embed',
   icon: () => <Icon iconName="link" $size="16px" />,
-  isSelected: (block: any) => block.type === 'embed',
+  isSelected: (block: { type: string }) => block.type === 'embed',
 });
