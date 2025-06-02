@@ -16,6 +16,7 @@ const nextConfig = {
     styledComponents: true,
   },
   generateBuildId: () => buildId,
+  transpilePackages: ['mintaka'],
   env: {
     NEXT_PUBLIC_BUILD_ID: buildId,
   },
