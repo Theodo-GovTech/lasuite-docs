@@ -8,6 +8,8 @@ and this project adheres to
 
 ## [Unreleased]
 
+- ✨(frontend) Add a custom database block to the editor #1053
+
 ## [3.3.0] - 2025-05-06
 
 ### Added
