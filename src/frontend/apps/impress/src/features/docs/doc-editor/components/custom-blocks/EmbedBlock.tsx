@@ -61,6 +61,7 @@ export const IFrameViewer = (
   >,
 ) => {
   const url = props.block.props.url;
+  const aspectRatio = props.block.props.aspectRatio || 16 / 9;
 
   const [iframeError, setIframeError] = React.useState(false);
   if (!url) {
@@ -68,16 +69,29 @@ export const IFrameViewer = (
   }
 
   return !iframeError ? (
-    <iframe
-      src={url}
-      className="bn-visual-media"
+    <div
       style={{
-        height: '300px',
+        position: 'relative',
+        width: '100%',
+        paddingTop: `${100 / aspectRatio}%`, // padding-top sets height relative to width
       }}
-      allowFullScreen
-      title="Embedded content"
-      onError={() => setIframeError(true)}
-    />
+    >
+      <iframe
+        src={url}
+        className="bn-visual-media"
+        style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          width: '100%',
+          height: '100%',
+          border: 'none',
+        }}
+        allowFullScreen
+        title="Embedded content"
+        onError={() => setIframeError(true)}
+      />
+    </div>
   ) : (
     <Box
       $css={css`
