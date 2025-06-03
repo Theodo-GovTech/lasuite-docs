@@ -31,7 +31,7 @@ export const AddRowButton = ({
       return updatedRows;
     });
 
-    void createRecords(documentId, tableId, [{ fields: newRow }]);
+    createRecords({ documentId, tableId, records: [{ fields: newRow }] });
   };
 
   const color = '#817E77';
