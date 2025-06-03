@@ -1,9 +1,10 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import styled from 'styled-components';
 
 import { ChartData, ChartOptions } from './types';
 import { CollapsibleCard } from './CollapsibleCard';
 import { Input, Checkbox, Select } from '@openfun/cunningham-react';
+import { update } from 'lodash';
 
 interface ChartOptionsFormProps {
   data: ChartData;
@@ -47,6 +48,8 @@ export const ChartOptionsForm: React.FC<ChartOptionsFormProps> = ({
 
   const handleXAxisChange = (e) => {
     const selected = e.target.value;
+    console.log('Selected X Axis:', selected);
+    updateOption('xAxisKey', selected);
     updateDisplayedData({
       ...data,
       labels: rawDatasets.find((ds) => ds.id === selected)?.data || [],
@@ -55,6 +58,8 @@ export const ChartOptionsForm: React.FC<ChartOptionsFormProps> = ({
 
   const handleYAxisChange = (event) => {
     const selected = event.target.value;
+
+    updateOption('yAxisKeys', selected);
     updateY(selected);
   };
 
@@ -87,6 +92,7 @@ export const ChartOptionsForm: React.FC<ChartOptionsFormProps> = ({
 
         <Select
           label="X Axis Data"
+          value={options.xAxisKey || ''}
           options={dataSetOptions}
           onChange={handleXAxisChange}
           clearable
@@ -102,7 +108,7 @@ export const ChartOptionsForm: React.FC<ChartOptionsFormProps> = ({
         <Select
           label="Y Axis Data"
           options={dataSetOptions}
-          // value={options.yAxisKeys || []}
+          value={options.yAxisKeys || []}
           onChange={handleYAxisChange}
           multi
           clearable

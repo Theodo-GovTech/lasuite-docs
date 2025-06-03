@@ -23,45 +23,17 @@ const initialData: ChartData = {
   ],
 };
 
-const initialOptions: ChartOptions = {
-  title: 'My Chart',
-  showLegend: true,
-  xAxisLabel: 'Months',
-  yAxisLabel: 'Values',
-  xAxisKey: '',
-  yAxisKeys: [],
-};
-
 const ChartEditorContainer = styled.div`
-  width: 80%;
   padding: 1.5rem;
-  min-height: 100vh;
-  margin: 0 auto;
+  width: 100%;
   display: flex;
   flex-direction: column;
-  flex: 1;
 `;
 
 const ChartEditorHeader = styled.div`
   display: flex;
   justify-content: end;
   margin-bottom: 2rem;
-`;
-
-const ChartEditorTitle = styled.h1`
-  font-size: 1.875rem;
-  font-weight: bold;
-  color: #111827;
-  margin-bottom: 0.5rem;
-`;
-
-const ChartEditorSubtitle = styled.p`
-  color: #4b5563;
-`;
-
-const ChartEditorGrid = styled.div`
-  display: flex;
-  gap: 2rem;
 `;
 
 export interface ChartEditorProps {
@@ -86,10 +58,8 @@ export const ChartEditor: React.FC<ChartEditorProps> = ({
   const [rawDatasets, setRawDatasets] = useState<any[]>([]);
   const [chartData, setChartData] = useState<ChartData>(initialData);
   const [chartOptions, setChartOptions] = useState<ChartOptions>({
-    ...initialOptions,
     ...initialChartOptions,
   });
-  const [showEditor, setShowEditor] = useState(true);
 
   // Récupération des données Grist
   const { tableData } = useGristTableData({
@@ -124,38 +94,13 @@ export const ChartEditor: React.FC<ChartEditorProps> = ({
 
     // Set initial chart options if not already set
     if (pulledDatasets.length > 0 && !chartOptions.xAxisKey) {
-      setChartOptions((prev) => ({
-        ...prev,
-        xAxisKey: pulledDatasets[0]?.id || '',
-        yAxisKeys: pulledDatasets.slice(1).map((d) => d.id) || [],
-      }));
+      // setConfig((prev) => ({
+      //   ...prev,
+      //   labels: pulledDatasets[0] || [],
+      //   yAxisKeys: pulledDatasets.slice(1).map((d) => d.id) || [],
+      // });
     }
   }, [tableData]);
-
-  // Transform raw datasets based on chart options
-  useEffect(() => {
-    if (rawDatasets.length === 0) return;
-
-    const xAxisDataset = rawDatasets.find(
-      (d) => d.id === chartOptions.xAxisKey,
-    );
-    const yAxisDatasets = rawDatasets.filter((d) =>
-      chartOptions.yAxisKeys.includes(d.id),
-    );
-
-    if (xAxisDataset && yAxisDatasets.length > 0) {
-      setChartData({
-        labels: xAxisDataset.data,
-        datasets: yAxisDatasets,
-      });
-    } else {
-      // Fallback to original data structure
-      setChartData({
-        labels: rawDatasets[0]?.data || [],
-        datasets: rawDatasets,
-      });
-    }
-  }, [rawDatasets, chartOptions.xAxisKey, chartOptions.yAxisKeys]);
 
   const [config, setConfig] = useState<ChartConfig>({
     type: chartType,
