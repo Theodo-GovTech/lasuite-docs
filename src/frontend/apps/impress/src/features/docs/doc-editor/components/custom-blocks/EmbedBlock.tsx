@@ -42,7 +42,7 @@ export const iframePropSchema: PropSchema & {
   caption: { default: '' },
   name: { default: '' },
   showPreview: { default: true },
-  previewWidth: { type: 'number', default: undefined },
+  previewWidth: { default: 500 },
 };
 
 export const iframeBlockConfig = {
@@ -103,9 +103,7 @@ export const IFrameViewer = (
       ref={containerRef}
       style={{
         position: 'relative',
-        padding: '10px',
         width: '100%',
-        background: '#ff0000',
         paddingTop: `${100 / aspectRatio}%`, // padding-top sets height relative to width
       }}
     >
