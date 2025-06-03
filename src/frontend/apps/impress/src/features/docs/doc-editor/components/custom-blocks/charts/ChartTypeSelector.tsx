@@ -1,26 +1,13 @@
 import React from 'react';
-import styled from 'styled-components';
 
 import { ChartType } from './types';
 import { CollapsibleCard } from './CollapsibleCard';
+import { Select } from '@openfun/cunningham-react';
 
 interface ChartTypeSelectorProps {
   value: ChartType;
   onChange: (type: ChartType) => void;
 }
-
-const Select = styled.select`
-  width: 100%;
-  padding: 0.5rem;
-  border: 1px solid #d1d5db;
-  border-radius: 0.375rem;
-  font-size: 1rem;
-  &:focus {
-    outline: none;
-    border-color: transparent;
-    box-shadow: 0 0 0 2px #3b82f6;
-  }
-`;
 
 export const ChartTypeSelector: React.FC<ChartTypeSelectorProps> = ({
   value,
@@ -35,15 +22,12 @@ export const ChartTypeSelector: React.FC<ChartTypeSelectorProps> = ({
   return (
     <CollapsibleCard title="Chart Type" defaultOpen={true}>
       <Select
+        label="Select Chart Type"
+        options={chartTypes}
+        clearable={false}
         value={value}
         onChange={(e) => onChange(e.target.value as ChartType)}
-      >
-        {chartTypes.map((type) => (
-          <option key={type.value} value={type.value}>
-            {type.label}
-          </option>
-        ))}
-      </Select>
+      />
     </CollapsibleCard>
   );
 };

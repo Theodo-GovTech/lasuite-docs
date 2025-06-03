@@ -3,6 +3,7 @@ import styled from 'styled-components';
 
 import { ChartOptions } from './types';
 import { CollapsibleCard } from './CollapsibleCard';
+import { Input, Checkbox } from '@openfun/cunningham-react';
 
 interface ChartOptionsFormProps {
   options: ChartOptions;
@@ -13,47 +14,6 @@ const FormContainer = styled.div`
   display: flex;
   flex-direction: column;
   gap: 1rem;
-`;
-
-const Label = styled.label`
-  display: block;
-  font-size: 0.875rem;
-  font-weight: 500;
-  color: #374151;
-  margin-bottom: 0.5rem;
-`;
-
-const Input = styled.input`
-  width: 100%;
-  padding: 0.5rem;
-  border: 1px solid #d1d5db;
-  border-radius: 0.375rem;
-  font-size: 1rem;
-  &:focus {
-    outline: none;
-    border-color: transparent;
-    box-shadow: 0 0 0 2px #3b82f6;
-  }
-`;
-
-const CheckboxLabel = styled.label`
-  display: flex;
-  align-items: center;
-`;
-
-const Checkbox = styled.input`
-  margin-right: 0.5rem;
-  height: 1rem;
-  width: 1rem;
-  color: #2563eb;
-  border: 1px solid #d1d5db;
-  border-radius: 0.25rem;
-`;
-
-const CheckboxText = styled.span`
-  font-size: 0.875rem;
-  font-weight: 500;
-  color: #374151;
 `;
 
 export const ChartOptionsForm: React.FC<ChartOptionsFormProps> = ({
@@ -67,10 +27,9 @@ export const ChartOptionsForm: React.FC<ChartOptionsFormProps> = ({
   return (
     <CollapsibleCard title="Chart Options" defaultOpen={true}>
       <FormContainer>
-        {/* <SectionTitle>Chart Options</SectionTitle> */}
         <div>
-          <Label>Chart Title</Label>
           <Input
+            label="Chart Title"
             type="text"
             value={options.title}
             onChange={(e) => updateOption('title', e.target.value)}
@@ -78,18 +37,15 @@ export const ChartOptionsForm: React.FC<ChartOptionsFormProps> = ({
           />
         </div>
         <div>
-          <CheckboxLabel>
-            <Checkbox
-              type="checkbox"
-              checked={options.showLegend}
-              onChange={(e) => updateOption('showLegend', e.target.checked)}
-            />
-            <CheckboxText>Show Legend</CheckboxText>
-          </CheckboxLabel>
+          <Checkbox
+            type="checkbox"
+            label="Show Legend"
+            // onChange={(e) => updateOption('showLegend', e.target.checked)}
+          />
         </div>
         <div>
-          <Label>X-Axis Label</Label>
           <Input
+            label="X-Axis Label"
             type="text"
             value={options.xAxisLabel}
             onChange={(e) => updateOption('xAxisLabel', e.target.value)}
@@ -97,9 +53,9 @@ export const ChartOptionsForm: React.FC<ChartOptionsFormProps> = ({
           />
         </div>
         <div>
-          <Label>Y-Axis Label</Label>
           <Input
             type="text"
+            label="Y-Axis Label"
             value={options.yAxisLabel}
             onChange={(e) => updateOption('yAxisLabel', e.target.value)}
             placeholder="Enter Y-axis label"
