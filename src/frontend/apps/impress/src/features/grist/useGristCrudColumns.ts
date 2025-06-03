@@ -1,4 +1,5 @@
 import { gristFetchApi } from '@/api';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 export enum ColumnType {
   TEXT = 'Text',
@@ -11,35 +12,44 @@ type ColumnInput = {
   label: string;
 };
 
+const _createColumns = async ({
+  documentId,
+  tableId,
+  columns,
+}: {
+  documentId: string;
+  tableId: string;
+  columns: { id: string; fields: ColumnInput }[];
+}) => {
+  const url = `docs/${documentId}/tables/${tableId}/columns`;
+  const response = await gristFetchApi(url, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ columns }),
+  });
+
+  if (!response.ok) {
+    const errorBody = await response.text();
+    throw new Error(
+      `Failed to create columns: ${response.status} ${response.statusText} - ${errorBody}`,
+    );
+  }
+
+  return (await response.json()) as Promise<{ records: { id: string }[] }>;
+};
+
 export const useGristCrudColumns = () => {
-  const createColumns = async (
-    documentId: string,
-    tableId: string,
-    columns: { id: string; fields: ColumnInput }[],
-  ) => {
-    const url = `docs/${documentId}/tables/${tableId}/columns`;
-    try {
-      const response = await gristFetchApi(url, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ columns }),
+  const queryClient = useQueryClient();
+  const { mutate: createColumns } = useMutation({
+    mutationFn: _createColumns,
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({
+        queryKey: ['getTableData', variables.documentId, variables.tableId],
       });
-
-      if (!response.ok) {
-        const errorBody = await response.text();
-        throw new Error(
-          `Failed to create columns: ${response.status} ${response.statusText} - ${errorBody}`,
-        );
-      }
-
-      return (await response.json()) as Promise<{ records: { id: string }[] }>;
-    } catch (error) {
-      console.error('Error creating Grist record:', error);
-      throw error;
-    }
-  };
+    },
+  });
 
   const deleteColumns = async (
     documentId: string,
