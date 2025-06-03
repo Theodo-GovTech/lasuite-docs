@@ -1,42 +1,36 @@
-import { useEffect, useState } from 'react';
-
 import { APIError, errorCauses, gristFetchApi } from '@/api';
+import { useQuery } from '@tanstack/react-query';
 
 export type UseGristTableDataArguments = {
   documentId: string;
   tableId: string;
 };
 
+const getTableData = async (documentId: string, tableId: string) => {
+  const url = `docs/${documentId}/tables/${tableId}/data`;
+  const response = await gristFetchApi(url);
+  if (!response.ok) {
+    throw new APIError(
+      'Failed to fetch Grist table data',
+      await errorCauses(response),
+    );
+  }
+  return (await response.json()) as Promise<
+    Record<string, (string | number | boolean)[]>
+  >;
+};
+
 export const useGristTableData = ({
   documentId,
   tableId,
 }: UseGristTableDataArguments) => {
-  const [tableData, setTableData] = useState<
-    Record<string, (string | number | boolean)[]>
-  >({});
+  const { data: tableData, isLoading } = useQuery({
+    queryKey: ['getTableData', documentId, tableId],
+    queryFn: () => getTableData(documentId, tableId),
+  });
 
-  useEffect(() => {
-    const fetchData = async () => {
-      const url = `docs/${documentId}/tables/${tableId}/data`;
-      const response = await gristFetchApi(url);
-      if (!response.ok) {
-        throw new APIError(
-          'Failed to fetch Grist table data',
-          await errorCauses(response),
-        );
-      }
-      return (await response.json()) as Promise<unknown>;
-    };
-
-    fetchData()
-      .then((res) => {
-        setTableData(res as Record<string, (string | number | boolean)[]>);
-      })
-      .catch((error) => {
-        console.error('Error fetching Grist table data:', error);
-      });
-  }, [documentId, tableId]);
   return {
     tableData,
+    isLoading,
   };
 };

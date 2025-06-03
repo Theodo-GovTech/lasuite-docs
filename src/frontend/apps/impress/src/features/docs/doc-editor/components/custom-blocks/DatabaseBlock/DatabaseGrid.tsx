@@ -46,7 +46,7 @@ export const DatabaseGrid = ({
   const { colDefs, setColDefs } = useColumns();
 
   useEffect(() => {
-    const filteredEntries = Object.entries(tableData).filter(
+    const filteredEntries = Object.entries(tableData || {}).filter(
       ([key]) => key !== 'manualSort',
     );
 
