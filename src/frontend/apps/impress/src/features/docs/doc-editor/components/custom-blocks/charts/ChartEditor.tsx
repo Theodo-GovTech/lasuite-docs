@@ -7,6 +7,8 @@ import { LiveChartPreview } from './LiveChartPreview';
 import { ChartConfig, ChartData, ChartOptions, ChartType } from './types';
 import { useGristTableData } from '@/features/grist';
 
+import { Utils } from './utils';
+
 const initialData: ChartData = {
   labels: ['January', 'February', 'March', 'April', 'May'],
   datasets: [
@@ -25,6 +27,8 @@ const initialOptions: ChartOptions = {
   showLegend: true,
   xAxisLabel: 'Months',
   yAxisLabel: 'Values',
+  xAxisKey: '',
+  yAxisKeys: [],
 };
 
 const ChartEditorContainer = styled.div`
@@ -92,24 +96,28 @@ const ToggleButton = styled.button`
 export interface ChartEditorProps {
   documentId: string;
   tableId: string;
-  chartType: ChartType; // Ajout de chartType
-  chartOptions: ChartOptions; // Ajout de chartOptions
-  onChartConfigChange: (config: { chartType: ChartType; chartOptions: ChartOptions }) => void;
+  chartType: ChartType;
+  chartOptions: ChartOptions;
+  onChartConfigChange: (config: {
+    chartType: ChartType;
+    chartOptions: ChartOptions;
+  }) => void;
 }
 
 export const ChartEditor: React.FC<ChartEditorProps> = ({
   documentId,
   tableId,
-  chartType: initialChartType, // Utilisation des valeurs initiales
+  chartType: initialChartType,
   chartOptions: initialChartOptions,
   onChartConfigChange,
 }) => {
   const [chartType, setChartType] = useState<ChartType>(initialChartType);
-  const [chartData, setChartData] = useState<ChartData>({
-    labels: [],
-    datasets: [],
+  const [rawDatasets, setRawDatasets] = useState<any[]>([]);
+  const [chartData, setChartData] = useState<ChartData>(initialData);
+  const [chartOptions, setChartOptions] = useState<ChartOptions>({
+    ...initialOptions,
+    ...initialChartOptions,
   });
-  const [chartOptions, setChartOptions] = useState<ChartOptions>(initialChartOptions);
   const [showEditor, setShowEditor] = useState(true);
 
   // Récupération des données Grist
@@ -118,48 +126,82 @@ export const ChartEditor: React.FC<ChartEditorProps> = ({
     tableId,
   });
 
-  // Transformation des données Grist en données pour le graphique
+  // Transformation des données Grist en datasets bruts
   useEffect(() => {
+    console.log('Table data:', tableData);
     const transformTableDataToChartData = (tableData: Record<string, any>) => {
-      const filteredEntries = Object.entries(tableData).filter(
-        ([key]) => key !== 'id' && key !== 'manualSort',
-      );
+      const datasets = [];
 
-      if (filteredEntries.length === 0) {
-        return { labels: [], datasets: [] };
+      for (const key in tableData) {
+        if (key === 'id' || key === 'manualSort') continue;
+
+        const color = Utils.namedColor(1);
+        datasets.push({
+          id: key,
+          label: key,
+          data: tableData[key],
+          borderColor: color,
+          backgroundColor: Utils.transparentize(color, 0.5),
+        });
       }
 
-      const labels = filteredEntries[0][1].map((value: any) => String(value ?? ''));
-      const datasets = filteredEntries.slice(1).map(([key, values], idx) => ({
-        id: `dataset-${idx}`,
-        label: key,
-        data: values.map((v) =>
-          typeof v === 'number'
-            ? v
-            : typeof v === 'string' && !isNaN(Number(v))
-            ? Number(v)
-            : 0
-        ),
-        backgroundColor: 'rgba(53, 162, 235, 0.5)',
-        borderColor: 'rgba(53, 162, 235, 1)',
-      }));
-
-      return { labels, datasets };
+      return datasets;
     };
 
-    setChartData(transformTableDataToChartData(tableData));
+    const pulledDatasets = transformTableDataToChartData(tableData);
+    setRawDatasets(pulledDatasets);
+
+    // Set initial chart options if not already set
+    if (pulledDatasets.length > 0 && !chartOptions.xAxisKey) {
+      setChartOptions((prev) => ({
+        ...prev,
+        xAxisKey: pulledDatasets[0]?.id || '',
+        yAxisKeys: pulledDatasets.slice(1).map((d) => d.id) || [],
+      }));
+    }
   }, [tableData]);
 
-  // Communication des modifications de configuration au parent
+  // Transform raw datasets based on chart options
   useEffect(() => {
-    onChartConfigChange({ chartType, chartOptions });
-  }, [chartType, chartOptions]);
+    if (rawDatasets.length === 0) return;
 
-  const config: ChartConfig = {
+    const xAxisDataset = rawDatasets.find(
+      (d) => d.id === chartOptions.xAxisKey,
+    );
+    const yAxisDatasets = rawDatasets.filter((d) =>
+      chartOptions.yAxisKeys.includes(d.id),
+    );
+
+    if (xAxisDataset && yAxisDatasets.length > 0) {
+      setChartData({
+        labels: xAxisDataset.data,
+        datasets: yAxisDatasets,
+      });
+    } else {
+      // Fallback to original data structure
+      setChartData({
+        labels: rawDatasets[0]?.data || [],
+        datasets: rawDatasets,
+      });
+    }
+  }, [rawDatasets, chartOptions.xAxisKey, chartOptions.yAxisKeys]);
+
+  const [config, setConfig] = useState<ChartConfig>({
     type: chartType,
     data: chartData,
     options: chartOptions,
-  };
+  });
+
+  // Update config when dependencies change
+  useEffect(() => {
+    // console.log('Updating chart config:');
+    setConfig({
+      type: chartType,
+      data: chartData,
+      options: chartOptions,
+    });
+    onChartConfigChange({ chartType, chartOptions });
+  }, [chartType, chartData, chartOptions, onChartConfigChange]);
 
   return (
     <ChartEditorContainer>
@@ -184,8 +226,13 @@ export const ChartEditor: React.FC<ChartEditorProps> = ({
           <ControlPanel>
             <ChartTypeSelector value={chartType} onChange={setChartType} />
             <ChartOptionsForm
+              rawDatasets={rawDatasets}
+              data={chartData}
               options={chartOptions}
               onChange={setChartOptions}
+              updateDisplayedData={(newData: ChartData) => {
+                setChartData(newData);
+              }}
             />
           </ControlPanel>
         )}

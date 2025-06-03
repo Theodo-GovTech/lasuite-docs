@@ -1,23 +1,24 @@
-export type ChartType = 'bar' | 'line' | 'pie';
+export interface ChartData {
+  labels: string[] | number[];
+  datasets: ChartDataset[];
+}
 
-export interface Dataset {
+export interface ChartDataset {
   id: string;
   label: string;
   data: number[];
-  backgroundColor?: string;
-  borderColor?: string;
-}
-
-export interface ChartData {
-  labels: string[];
-  datasets: Dataset[];
+  backgroundColor?: string | string[];
+  borderColor?: string | string[];
+  hidden?: boolean;
 }
 
 export interface ChartOptions {
-  title: string;
-  showLegend: boolean;
-  xAxisLabel: string;
-  yAxisLabel: string;
+  title?: string;
+  showLegend?: boolean;
+  xAxisLabel?: string;
+  yAxisLabel?: string;
+  xAxisKey?: string;
+  yAxisKeys?: string[];
 }
 
 export interface ChartConfig {
@@ -25,3 +26,5 @@ export interface ChartConfig {
   data: ChartData;
   options: ChartOptions;
 }
+
+export type ChartType = 'bar' | 'line' | 'pie';

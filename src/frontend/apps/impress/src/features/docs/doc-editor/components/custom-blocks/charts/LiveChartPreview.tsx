@@ -54,6 +54,14 @@ export const LiveChartPreview: React.FC<LiveChartPreviewProps> = ({
       legend: {
         display: options.showLegend,
         position: 'top' as const,
+        onClick: (e, legendItem, legend) => {
+          const index = legendItem.datasetIndex;
+          const ci = legend.chart;
+          const meta = ci.getDatasetMeta(index);
+          meta.hidden =
+            meta.hidden === null ? !ci.data.datasets[index].hidden : null;
+          ci.update();
+        },
       },
       title: {
         display: !!options.title,
