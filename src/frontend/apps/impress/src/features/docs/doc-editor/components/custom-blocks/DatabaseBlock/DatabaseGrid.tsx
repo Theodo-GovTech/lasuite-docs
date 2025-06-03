@@ -2,6 +2,7 @@ import {
   CellEditingStoppedEvent,
   ColDef,
   ColSpanParams,
+  ColumnMovedEvent,
   ICellRendererParams,
 } from 'ag-grid-community';
 import { AgGridReact } from 'ag-grid-react';
@@ -158,6 +159,11 @@ export const DatabaseGrid = ({
     [documentId, tableId],
   );
 
+  const onColumnMoved = useCallback((e: ColumnMovedEvent<DatabaseRow>) => {
+    if (e.finished === false) { return}
+    console.log('Event Column Moved', e, e.column?.colId);
+  }, []);
+
   return (
     <>
       <Box style={{ height: '100%', width: '100%' }}>
@@ -169,6 +175,7 @@ export const DatabaseGrid = ({
           enableCellSpan={true}
           onCellEditingStopped={onCellEditingStopped}
           pinnedBottomRowData={[addNewRowRow]}
+          onColumnMoved={onColumnMoved}
         />
       </Box>
       <AddButtonComponent addColumn={addColumn} />
