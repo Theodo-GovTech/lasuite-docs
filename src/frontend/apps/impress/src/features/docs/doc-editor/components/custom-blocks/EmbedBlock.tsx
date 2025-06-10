@@ -42,7 +42,7 @@ export const iframePropSchema: PropSchema & {
   caption: { default: '' },
   name: { default: '' },
   showPreview: { default: true },
-  previewWidth: { default: 500 },
+  previewWidth: { default: undefined, type: 'number' },
 };
 
 export const iframeBlockConfig = {
