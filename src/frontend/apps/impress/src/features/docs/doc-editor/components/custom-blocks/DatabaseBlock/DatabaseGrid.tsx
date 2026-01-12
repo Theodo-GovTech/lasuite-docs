@@ -46,7 +46,7 @@ export const DatabaseGrid = ({
   const { colDefs, setColDefs } = useColumns();
 
   useEffect(() => {
-    const filteredEntries = Object.entries(tableData).filter(
+    const filteredEntries = Object.entries(tableData || {}).filter(
       ([key]) => key !== 'manualSort',
     );
 
@@ -125,15 +125,19 @@ export const DatabaseGrid = ({
       return [...(prev !== undefined ? prev : []), newColDef];
     });
 
-    void createColumns(documentId, tableId, [
-      {
-        id: columnName,
-        fields: {
-          label: columnName,
-          type: ColumnType.TEXT,
+    createColumns({
+      documentId,
+      tableId,
+      columns: [
+        {
+          id: columnName,
+          fields: {
+            label: columnName,
+            type: ColumnType.TEXT,
+          },
         },
-      },
-    ]);
+      ],
+    });
   };
 
   const onCellEditingStopped = useCallback(

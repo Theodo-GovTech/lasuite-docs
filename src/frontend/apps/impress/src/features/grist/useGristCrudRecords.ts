@@ -1,34 +1,44 @@
 import { gristFetchApi } from '@/api';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+
+const _createRecords = async ({
+  documentId,
+  tableId,
+  records,
+}: {
+  documentId: string;
+  tableId: string;
+  records: { fields: unknown }[];
+}) => {
+  const url = `docs/${documentId}/tables/${tableId}/records`;
+  const response = await gristFetchApi(url, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ records }),
+  });
+
+  if (!response.ok) {
+    const errorBody = await response.text();
+    throw new Error(
+      `Failed to create record: ${response.status} ${response.statusText} - ${errorBody}`,
+    );
+  }
+
+  return (await response.json()) as Promise<{ records: { id: string }[] }>;
+};
 
 export const useGristCrudRecords = () => {
-  const createRecords = async (
-    documentId: string,
-    tableId: string,
-    records: { fields: unknown }[],
-  ) => {
-    const url = `docs/${documentId}/tables/${tableId}/records`;
-    try {
-      const response = await gristFetchApi(url, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ records }),
+  const queryClient = useQueryClient();
+  const { mutate: createRecords } = useMutation({
+    mutationFn: _createRecords,
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({
+        queryKey: ['getTableData', variables.documentId, variables.tableId],
       });
-
-      if (!response.ok) {
-        const errorBody = await response.text();
-        throw new Error(
-          `Failed to create record: ${response.status} ${response.statusText} - ${errorBody}`,
-        );
-      }
-
-      return (await response.json()) as Promise<{ records: { id: string }[] }>;
-    } catch (error) {
-      console.error('Error creating Grist record:', error);
-      throw error;
-    }
-  };
+    },
+  });
 
   const deleteRecords = async (
     documentId: string,
